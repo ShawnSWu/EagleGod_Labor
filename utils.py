@@ -19,22 +19,39 @@ EMAIL_USER = os.getenv("EMAIL_USER")
 EMAIL_APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
 RECEIVER_EMAIL = os.getenv("RECEIVER_EMAIL")
 
-# Email Templates
-EMAIL_SUBJECT_SUCCESS = "⚔️ 【社畜形態・覺醒】勞動神鷹看見你了"
-EMAIL_BODY_SUCCESS = """打卡完成。
+# Email Templates - Clock In
+EMAIL_SUBJECT_IN_SUCCESS = "⚔️ 【社畜形態・覺醒】勞動神鷹看見你了"
+EMAIL_BODY_IN_SUCCESS = """打卡成功。
 
 🦅 勞動神鷹已注視此行為，
 你的出勤被記錄於今日的時間軸。
 
 請安心開始勞動。"""
 
-EMAIL_SUBJECT_FAILURE = "☠️ 【社畜形態・覺醒失敗】你就是勞工之光"
-EMAIL_BODY_FAILURE = """打卡未完成。
+EMAIL_SUBJECT_IN_FAILURE = "☠️ 【社畜形態・覺醒失敗】你就是勞工之光"
+EMAIL_BODY_IN_FAILURE = """打卡未完成。
 
 ✨ 你仍是「勞工之光」，
 但尚未被勞動諸神正式承認。
 
 請重新嘗試覺醒。"""
+
+# Email Templates - Clock Out
+EMAIL_SUBJECT_OUT_SUCCESS = "🕊️ 【回歸凡人・解脫】勞動神鷹准許你離去"
+EMAIL_BODY_OUT_SUCCESS = """簽退成功。
+
+🦅 勞動神鷹收回了他的注視，
+你重新掌握了你的時間。
+
+請享受你的自由時光。"""
+
+EMAIL_SUBJECT_OUT_FAILURE = "🌑 【封印解除失敗】神鷹拒絕放行"
+EMAIL_BODY_OUT_FAILURE = """簽退未完成。
+
+⛓️ 枷鎖依然沉重，
+神鷹認為你的勞動尚不足以換取自由。
+
+請嘗試再次突破。"""
 
 def send_email(subject, body):
     """

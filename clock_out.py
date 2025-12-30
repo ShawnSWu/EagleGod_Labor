@@ -5,10 +5,10 @@ from utils import (
     get_logged_in_page, 
     navigate_to_checkin, 
     send_email, 
-    EMAIL_SUBJECT_SUCCESS, 
-    EMAIL_BODY_SUCCESS, 
-    EMAIL_SUBJECT_FAILURE, 
-    EMAIL_BODY_FAILURE
+    EMAIL_SUBJECT_OUT_SUCCESS, 
+    EMAIL_BODY_OUT_SUCCESS, 
+    EMAIL_SUBJECT_OUT_FAILURE, 
+    EMAIL_BODY_OUT_FAILURE
 )
 import sys
 
@@ -48,17 +48,16 @@ def clock_out(headless=True):
             print("簽退程序執行完畢。")
             
             if success:
-                success_body = EMAIL_BODY_SUCCESS.replace("請安心開始勞動。", "請安心結束勞動，回歸自由。")
-                body = f"{success_body}\n\n(系統訊息: {status_msg}, 延遲: {delay}秒)"
-                send_email(EMAIL_SUBJECT_SUCCESS, body)
+                body = f"{EMAIL_BODY_OUT_SUCCESS}\n\n(系統訊息: {status_msg}, 延遲: {delay}秒)"
+                send_email(EMAIL_SUBJECT_OUT_SUCCESS, body)
             else:
-                body = f"{EMAIL_BODY_FAILURE}\n\n(系統訊息: {status_msg}, 延遲: {delay}秒)"
-                send_email(EMAIL_SUBJECT_FAILURE, body)
+                body = f"{EMAIL_BODY_OUT_FAILURE}\n\n(系統訊息: {status_msg}, 延遲: {delay}秒)"
+                send_email(EMAIL_SUBJECT_OUT_FAILURE, body)
 
         except Exception as e:
-            error_msg = f"{EMAIL_BODY_FAILURE}\n\n(錯誤原因: {e})"
+            error_msg = f"{EMAIL_BODY_OUT_FAILURE}\n\n(錯誤原因: {e})"
             print(f"簽退發生錯誤: {e}")
-            send_email(EMAIL_SUBJECT_FAILURE, error_msg)
+            send_email(EMAIL_SUBJECT_OUT_FAILURE, error_msg)
         finally:
             if browser:
                 browser.close()
