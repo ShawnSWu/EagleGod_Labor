@@ -1,0 +1,5 @@
+.env
+__pycache__/
+*.png
+node_modules/
+.DS_Store
