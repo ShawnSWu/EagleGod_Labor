@@ -1,8 +1,8 @@
-name: EagleGod_Labor 勞動神鷹 (簽到)
+name: EagleGod Labor Clock In
 
 on:
   schedule:
-    - cron: '50 0 * * 1-5'
+    - cron: '10 10 * * 1-5'
   workflow_dispatch: # 允許手動觸發測試
 
 jobs:
@@ -31,5 +31,5 @@ jobs:
           pip install -r requirements.txt
           playwright install chromium
 
-      - name: Execution - Clock In
-        run: python clock_in.py
+      - name: Execution - Clock Out
+        run: python clock_out.py
