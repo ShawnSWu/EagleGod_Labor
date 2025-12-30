@@ -15,24 +15,12 @@ import sys
 def clock_out(headless=True):
     with sync_playwright() as p:
         browser = None
-        status_msg = "未知狀態"
+        status_msg = "等待回應超時"
         success = False
         try:
             browser, page = get_logged_in_page(p, headless=headless)
             navigate_to_checkin(page)
             
-            # 設定彈窗監聽器
-            def handle_dialog(dialog):
-                nonlocal status_msg, success
-                status_msg = dialog.message
-                print(f"系統訊息: {status_msg}")
-                # 簡單判斷關鍵字來決定是否成功
-                if "成功" in status_msg or "重複" in status_msg or "已簽退" in status_msg:
-                    success = True
-                dialog.accept()
-
-            page.on("dialog", handle_dialog)
-
             # 加入隨機延遲 (1 到 600 秒)
             delay = random.randint(1, 600)
             print(f"隨機延遲 {delay} 秒後執行簽退...")
@@ -41,11 +29,25 @@ def clock_out(headless=True):
             print("正在點擊 [簽退] 按鈕...")
             page.click("#btnclock2")
             
-            page.wait_for_timeout(3000)
+            # 偵測 SweetAlert 彈窗
+            try:
+                print("等待系統回應訊息...")
+                page.wait_for_selector(".sweet-alert", timeout=15000)
+                status_msg = page.inner_text(".sweet-alert h2")
+                print(f"系統訊息: {status_msg}")
+                
+                if any(k in status_msg for k in ["成功", "重複", "已簽到", "已簽退"]):
+                    success = True
+                
+                if page.is_visible(".confirm"):
+                    page.click(".confirm")
+            except Exception as e:
+                print(f"等待彈窗訊息時發生異常: {e}")
+                status_msg = "未捕捉到彈窗訊息，請檢查系統記錄"
+
             print("簽退程序執行完畢。")
             
             if success:
-                # 調整簽退時的結尾語
                 success_body = EMAIL_BODY_SUCCESS.replace("請安心開始勞動。", "請安心結束勞動，回歸自由。")
                 body = f"{success_body}\n\n(系統訊息: {status_msg}, 延遲: {delay}秒)"
                 send_email(EMAIL_SUBJECT_SUCCESS, body)

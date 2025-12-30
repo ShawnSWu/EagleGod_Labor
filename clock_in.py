@@ -15,24 +15,12 @@ import sys
 def clock_in(headless=True):
     with sync_playwright() as p:
         browser = None
-        status_msg = "未知狀態"
+        status_msg = "等待回應超時"
         success = False
         try:
             browser, page = get_logged_in_page(p, headless=headless)
             navigate_to_checkin(page)
             
-            # 設定彈窗監聽器
-            def handle_dialog(dialog):
-                nonlocal status_msg, success
-                status_msg = dialog.message
-                print(f"系統訊息: {status_msg}")
-                # 簡單判斷關鍵字來決定是否成功
-                if "成功" in status_msg or "重複" in status_msg or "已簽到" in status_msg:
-                    success = True
-                dialog.accept()
-
-            page.on("dialog", handle_dialog)
-
             # 加入隨機延遲 (1 到 600 秒)
             delay = random.randint(1, 600)
             print(f"隨機延遲 {delay} 秒後執行簽到...")
@@ -41,7 +29,29 @@ def clock_in(headless=True):
             print("正在點擊 [簽到] 按鈕...")
             page.click("#btnclock1")
             
-            page.wait_for_timeout(3000)
+            # 改用等待 .sweet-alert 元素出現，而不是 dialog 監聽器
+            try:
+                print("等待系統回應訊息...")
+                # 等待 SweetAlert 彈窗出現 (最多等 15 秒)
+                page.wait_for_selector(".sweet-alert", timeout=15000)
+                
+                # 抓取彈窗訊息 (通常在 h2 或 p 標籤中)
+                status_msg = page.inner_text(".sweet-alert h2")
+                print(f"系統訊息: {status_msg}")
+                
+                # 判斷關鍵字
+                if any(k in status_msg for k in ["成功", "重複", "已簽到", "已簽退"]):
+                    success = True
+                
+                # 點擊彈窗的確定按鈕 (如果有)
+                if page.is_visible(".confirm"):
+                    page.click(".confirm")
+                    
+            except Exception as e:
+                print(f"等待彈窗訊息時發生異常: {e}")
+                # 有些系統可能直接跳轉或沒跳彈窗，這裡做個備選預案
+                status_msg = "未捕捉到彈窗訊息，請檢查系統記錄"
+
             print("簽到程序執行完畢。")
             
             if success:
