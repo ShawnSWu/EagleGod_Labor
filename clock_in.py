@@ -18,14 +18,15 @@ def clock_in(headless=True):
         status_msg = "等待回應超時"
         success = False
         try:
+            # 加入隨機延遲 (1 到 600 秒)
+            # 移到最前面，防止登入後因延遲導致 Session 過期
+            delay = random.randint(1, 600)
+            print(f"隨機延遲 {delay} 秒後開始執行簽到流程...")
+            time.sleep(delay)
+
             browser, page = get_logged_in_page(p, headless=headless)
             navigate_to_checkin(page)
             
-            # 加入隨機延遲 (1 到 600 秒)
-            delay = random.randint(1, 600)
-            print(f"隨機延遲 {delay} 秒後執行簽到...")
-            time.sleep(delay)
-
             print("正在點擊 [簽到] 按鈕...")
             page.click("#btnclock1")
             

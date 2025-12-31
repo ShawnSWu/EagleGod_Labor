@@ -1,9 +1,7 @@
 name: EagleGod Labor Clock In
 
 on:
-  schedule:
-    - cron: '50 0 * * 1-5'
-  workflow_dispatch: # 允許手動觸發測試
+  workflow_dispatch: # 由外部服務 (如 Cron-job.org) 觸發，確保時間精準
 
 jobs:
   daka:
