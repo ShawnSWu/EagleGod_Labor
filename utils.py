@@ -1,5 +1,6 @@
 import os
 import time
+from datetime import datetime, timedelta, timezone
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -54,6 +55,51 @@ EMAIL_BODY_OUT_FAILURE = """簽退未完成。
 神鷹認為你的勞動尚不足以換取自由。
 
 請嘗試再次突破。"""
+
+# 2026 台灣國定假日 (僅列出週一至週五需放假的日子)
+TAIWAN_HOLIDAYS_2026 = [
+    "2026-01-01", # 元旦
+    "2026-02-16", # 春節 (除夕)
+    "2026-02-17", # 春節 (初一)
+    "2026-02-18", # 春節 (初二)
+    "2026-02-19", # 春節 (初三)
+    "2026-02-20", # 春節 (補假)
+    "2026-02-27", # 二二八補假 (2/28是週六)
+    "2026-04-03", # 兒童節補假 (4/4是週六)
+    "2026-04-06", # 清明節補假 (4/5是週日)
+    "2026-05-01", # 勞動節
+    "2026-06-19", # 端午節
+    "2026-09-25", # 中秋節
+    "2026-09-28", # 教師節 (週一)
+    "2026-10-09", # 國慶日補假 (10/10是週六)
+    "2026-10-26", # 台灣光復節補假 (10/25是週日)
+    "2026-12-25", # 行憲紀念日 (週五)
+]
+
+def is_workday():
+    """
+    判斷今天是否為工作日 (以台北時間 UTC+8 為準)。
+    1. 排除週六 (5) 與週日 (6)
+    2. 排除 TAIWAN_HOLIDAYS_2026 名單中的日子
+    """
+    # 強制設定為台北時間 (UTC+8)
+    tz_taiwan = timezone(timedelta(hours=8))
+    now = datetime.now(tz_taiwan)
+    today_str = now.strftime("%Y-%m-%d")
+    weekday = now.weekday()  # Monday is 0, Sunday is 6
+
+    # 1. 判斷是否為週末
+    if weekday >= 5:
+        print(f"今天是 {today_str} (週{'六' if weekday==5 else '日'})，休假不打卡。")
+        return False
+
+    # 2. 判斷是否為國定假日
+    if today_str in TAIWAN_HOLIDAYS_2026:
+        print(f"今天是 {today_str} (國定假日)，休假不打卡。")
+        return False
+
+    print(f"今天是 {today_str}，為工作日，準備執行打卡。")
+    return True
 
 def send_email(subject, body, image_path=None):
     """

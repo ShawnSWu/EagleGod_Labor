@@ -5,6 +5,7 @@ from utils import (
     get_logged_in_page, 
     navigate_to_checkin, 
     send_email, 
+    is_workday,
     EMAIL_SUBJECT_OUT_SUCCESS, 
     EMAIL_BODY_OUT_SUCCESS, 
     EMAIL_SUBJECT_OUT_FAILURE, 
@@ -18,9 +19,13 @@ def clock_out(headless=True):
         status_msg = "等待回應超時"
         success = False
         try:
-            # 加入隨機延遲 (1 到 600 秒)
+            # 檢查是否為工作日
+            if not is_workday():
+                return
+            
+            # 加入隨機延遲 (1 到 300 秒)
             # 移到最前面，防止登入後因延遲導致 Session 過期
-            delay = random.randint(1, 600)
+            delay = random.randint(1, 300)
             print(f"隨機延遲 {delay} 秒後開始執行簽退流程...")
             time.sleep(delay)
 
