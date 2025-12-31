@@ -1,5 +1,6 @@
 .env
 __pycache__/
 *.png
+!assets/*.png
 node_modules/
 .DS_Store

@@ -1,7 +1,9 @@
 import os
 import time
 import smtplib
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
 from email.header import Header
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
@@ -53,19 +55,48 @@ EMAIL_BODY_OUT_FAILURE = """簽退未完成。
 
 請嘗試再次突破。"""
 
-def send_email(subject, body):
+def send_email(subject, body, image_path=None):
     """
-    Sends an email notification via Gmail SMTP.
+    Sends an email notification via Gmail SMTP (HTML format with optional embedded image).
     """
     if not all([EMAIL_USER, EMAIL_APP_PASSWORD, RECEIVER_EMAIL]):
         print("郵件設定不完整，跳過郵件發送。")
         return
 
     try:
-        msg = MIMEText(body, 'plain', 'utf-8')
+        # Create message container
+        msg = MIMEMultipart('related')
         msg['Subject'] = Header(subject, 'utf-8')
         msg['From'] = f"EagleGod_Labor 勞動神鷹 <{EMAIL_USER}>"
         msg['To'] = RECEIVER_EMAIL
+
+        # Build HTML body
+        # Convert newline to <br> for HTML and use CID for image
+        html_body = body.replace("\n", "<br>")
+        img_html = ""
+        if image_path and os.path.exists(image_path):
+            img_html = '<br><br><img src="cid:status_image" style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">'
+        
+        full_html = f"""
+        <html>
+            <body style="font-family: 'Microsoft JhengHei', sans-serif; line-height: 1.6; color: #333;">
+                <div style="padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                    {html_body}
+                    {img_html}
+                </div>
+            </body>
+        </html>
+        """
+        
+        msg.attach(MIMEText(full_html, 'html', 'utf-8'))
+
+        # Attach image if provided
+        if image_path and os.path.exists(image_path):
+            with open(image_path, 'rb') as f:
+                img = MIMEImage(f.read())
+                img.add_header('Content-ID', '<status_image>')
+                img.add_header('Content-Disposition', 'inline', filename=os.path.basename(image_path))
+                msg.attach(img)
 
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(EMAIL_USER, EMAIL_APP_PASSWORD)

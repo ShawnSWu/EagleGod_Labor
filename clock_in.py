@@ -57,7 +57,7 @@ def clock_in(headless=True):
             
             if success:
                 body = f"{EMAIL_BODY_IN_SUCCESS}\n\n(系統訊息: {status_msg}, 延遲: {delay}秒)"
-                send_email(EMAIL_SUBJECT_IN_SUCCESS, body)
+                send_email(EMAIL_SUBJECT_IN_SUCCESS, body, image_path="assets/clock_in.png")
             else:
                 body = f"{EMAIL_BODY_IN_FAILURE}\n\n(系統訊息: {status_msg}, 延遲: {delay}秒)"
                 send_email(EMAIL_SUBJECT_IN_FAILURE, body)
