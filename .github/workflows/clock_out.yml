@@ -6,14 +6,28 @@ on:
 jobs:
   daka:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false  # 其中一人失敗時，不影響其他人執行
+      matrix:
+        include:
+          - user_id: "Shawn"
+            account_key: "ACCOUNT"
+            password_key: "PASSWORD"
+            email_key: "RECEIVER_EMAIL"
+          - user_id: "Lisa"
+            account_key: "ACCOUNT_A"
+            password_key: "PASSWORD_A"
+            email_key: "RECEIVER_EMAIL_A"
+
     env:
       LOGIN_URL: ${{ secrets.LOGIN_URL }}
-      ACCOUNT: ${{ secrets.ACCOUNT }}
-      PASSWORD: ${{ secrets.PASSWORD }}
       CHECKIN_URL: ${{ secrets.CHECKIN_URL }}
       EMAIL_USER: ${{ secrets.EMAIL_USER }}
       EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
-      RECEIVER_EMAIL: ${{ secrets.RECEIVER_EMAIL }}
+      # 動態根據矩陣選取不同的 Secret
+      ACCOUNT: ${{ secrets[matrix.account_key] }}
+      PASSWORD: ${{ secrets[matrix.password_key] }}
+      RECEIVER_EMAIL: ${{ secrets[matrix.email_key] }}
 
     steps:
       - name: Checkout code
@@ -29,5 +43,5 @@ jobs:
           pip install -r requirements.txt
           playwright install chromium
 
-      - name: Execution - Clock Out
+      - name: Execution - Clock Out (${{ matrix.user_id }})
         run: python clock_out.py
