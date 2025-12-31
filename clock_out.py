@@ -50,7 +50,7 @@ def clock_out(headless=True):
             
             if success:
                 body = f"{EMAIL_BODY_OUT_SUCCESS}\n\n(系統訊息: {status_msg}, 延遲: {delay}秒)"
-                send_email(EMAIL_SUBJECT_OUT_SUCCESS, body)
+                send_email(EMAIL_SUBJECT_OUT_SUCCESS, body, image_path="assets/clock_out.png")
             else:
                 body = f"{EMAIL_BODY_OUT_FAILURE}\n\n(系統訊息: {status_msg}, 延遲: {delay}秒)"
                 send_email(EMAIL_SUBJECT_OUT_FAILURE, body)
