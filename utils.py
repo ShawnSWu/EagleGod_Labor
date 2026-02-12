@@ -151,26 +151,38 @@ def send_email(subject, body, image_path=None):
     except Exception as e:
         print(f"郵件發送失敗: {e}")
 
-def get_logged_in_page(p, headless=True):
-    print(f"啟動瀏覽器 (無頭模式: {headless})...")
-    browser = p.chromium.launch(headless=headless)
-    context = browser.new_context()
-    page = context.new_page()
+def get_logged_in_page(p, headless=True, max_retries=3):
+    last_error = None
 
-    try:
-        print(f"正在前往登入頁面: {LOGIN_URL}")
-        page.goto(LOGIN_URL)
-        page.wait_for_selector("#login_name")
-        page.fill("#login_name", ACCOUNT)
-        page.fill("#password", PASSWORD)
-        page.click("#loginBtn")
-        page.wait_for_url("**/Default.aspx", timeout=15000)
-        print("登入成功！")
-        return browser, page
-    except Exception as e:
-        print(f"登入過程中發生錯誤: {e}")
-        browser.close()
-        raise e
+    for attempt in range(1, max_retries + 1):
+        browser = None
+        try:
+            print(f"啟動瀏覽器 (無頭模式: {headless})... [嘗試 {attempt}/{max_retries}]")
+            browser = p.chromium.launch(headless=headless)
+            context = browser.new_context()
+            page = context.new_page()
+
+            print(f"正在前往登入頁面: {LOGIN_URL}")
+            page.goto(LOGIN_URL, timeout=30000)
+            page.wait_for_selector("#login_name", timeout=15000)
+            page.fill("#login_name", ACCOUNT)
+            page.fill("#password", PASSWORD)
+            page.click("#loginBtn", no_wait_after=True)
+            page.wait_for_url("**/Default.aspx", timeout=30000)
+            print("登入成功！")
+            return browser, page
+        except Exception as e:
+            last_error = e
+            print(f"登入嘗試 {attempt}/{max_retries} 失敗: {e}")
+            if browser:
+                browser.close()
+            if attempt < max_retries:
+                wait_sec = 5 * attempt
+                print(f"等待 {wait_sec} 秒後重試...")
+                time.sleep(wait_sec)
+
+    print(f"所有 {max_retries} 次登入嘗試均失敗。")
+    raise last_error
 
 def navigate_to_checkin(page):
     print(f"正在前往打卡頁面: {CHECKIN_URL}")
