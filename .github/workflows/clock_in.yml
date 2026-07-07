@@ -30,6 +30,10 @@ jobs:
             account_key: "ACCOUNT_D"
             password_key: "PASSWORD_D"
             email_key: "RECEIVER_EMAIL_D"
+          - user_id: "Jessica"
+            account_key: "ACCOUNT_E"
+            password_key: "PASSWORD_E"
+            email_key: "RECEIVER_EMAIL_E"
 
     env:
       LOGIN_URL: ${{ secrets.LOGIN_URL }}
